@@ -1,4 +1,4 @@
-name: Build Android APK (No EAS)
+name: Build Debug APK (No Lint)
 
 on:
   push:
@@ -33,20 +33,18 @@ jobs:
       - name: Generate native Android project
         run: npx expo prebuild --platform android
 
-      - name: Configure Gradle (memory + disable lint)
+      - name: Configure Gradle memory and disable lint
         run: |
-          # 1. Увеличиваем Metaspace и heap
-          echo "org.gradle.jvmargs=-Xmx3g -XX:MaxMetaspaceSize=1g -XX:+HeapDumpOnOutOfMemoryError" >> android/gradle.properties
+          # Увеличиваем память
+          echo "org.gradle.jvmargs=-Xmx3g -XX:MaxMetaspaceSize=1g" >> android/gradle.properties
+          # Отключаем все задачи lint глобально
+          echo "android.lint=false" >> android/gradle.properties
 
-          # 2. Отключаем все задачи lint во всех модулях
-          # Вставляем блок в корневой build.gradle сразу после allprojects {
-          sed -i '/^allprojects {/a \    tasks.whenTaskAdded { task -> if (task.name.toLowerCase().contains("lint")) task.enabled = false }' android/build.gradle
-
-      - name: Build Release APK
-        run: cd android && ./gradlew assembleRelease
+      - name: Build Debug APK
+        run: cd android && ./gradlew assembleDebug
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: app-release
-          path: android/app/build/outputs/apk/release/app-release.apk
+          name: app-debug
+          path: android/app/build/outputs/apk/debug/app-debug.apk
