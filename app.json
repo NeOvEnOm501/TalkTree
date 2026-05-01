@@ -21,10 +21,19 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.niky501.TalkTree"
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "8a3a6a32-91da-4a89-a609-a600765f165b"
+      }
+    },
+    "updates": {
+      "url": "https://u.expo.dev/8a3a6a32-91da-4a89-a609-a600765f165b"
     }
   }
 }
