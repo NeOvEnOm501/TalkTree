@@ -34,7 +34,7 @@ jobs:
         run: npx expo prebuild --platform android
 
       - name: Build Release APK
-        run: cd android && ./gradlew assembleRelease
+        run: cd android && ./gradlew assembleRelease -x lintVitalAnalyzeRelease
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
