@@ -1,0 +1,35 @@
+workflows:
+  # Можно назвать как угодно, например, android-build
+  android-build:
+    name: Build Android APK
+    # Собираем на Linux-машине
+    instance_type: linux_x2
+    environment:
+      node: 20.0.0
+    # Триггеры сборки
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: main
+    scripts:
+      # 1. Устанавливаем зависимости
+      - name: Install npm dependencies
+        script: npm ci
+      # 2. Генерируем нативные папки (ios и android)
+      - name: Expo Prebuild
+        script: npx expo prebuild
+      # 3. Увеличиваем память для Gradle (чтобы избежать Metaspace)
+      #    и отключаем все линтеры, которые жрут память
+      - name: Configure Gradle
+        script: |
+          echo "org.gradle.jvmargs=-Xmx4096m -XX:MaxMetaspaceSize=1g" >> android/gradle.properties
+          echo "android.lint=false" >> android/gradle.properties
+      # 4. Запускаем сборку Android
+      - name: Build Android release
+        script: |
+          cd android
+          ./gradlew assembleRelease
+    artifacts:
+      # Указываем путь к APK-файлам, которые нужно сохранить
+      - android/app/build/outputs/apk/release/*.apk
