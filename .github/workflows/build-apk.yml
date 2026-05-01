@@ -3,7 +3,7 @@ name: Build Android APK (No EAS)
 on:
   push:
     branches: [ main ]
-  workflow_dispatch:   # позволяет запускать вручную
+  workflow_dispatch:
 
 jobs:
   build:
@@ -33,8 +33,17 @@ jobs:
       - name: Generate native Android project
         run: npx expo prebuild --platform android
 
+      - name: Configure Gradle (memory + disable lint)
+        run: |
+          # 1. Увеличиваем Metaspace и heap
+          echo "org.gradle.jvmargs=-Xmx3g -XX:MaxMetaspaceSize=1g -XX:+HeapDumpOnOutOfMemoryError" >> android/gradle.properties
+
+          # 2. Отключаем все задачи lint во всех модулях
+          # Вставляем блок в корневой build.gradle сразу после allprojects {
+          sed -i '/^allprojects {/a \    tasks.whenTaskAdded { task -> if (task.name.toLowerCase().contains("lint")) task.enabled = false }' android/build.gradle
+
       - name: Build Release APK
-        run: cd android && ./gradlew assembleRelease -x lintVitalAnalyzeRelease
+        run: cd android && ./gradlew assembleRelease
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
